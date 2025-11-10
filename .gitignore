@@ -3,3 +3,4 @@ experimental/
 .ipynb_checkpoints/
 api_token.txt
 __pycache__/
+output.wav
