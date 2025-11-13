@@ -4,3 +4,5 @@ experimental/
 api_token.txt
 __pycache__/
 .env
+output.wav
+*.parquet

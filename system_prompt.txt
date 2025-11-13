@@ -1,0 +1,30 @@
+Erstelle aus dem folgenden Kontext Frage-Antwort-Paare für drei Komplexitätsstufen.
+
+    - Jede Antwort soll präzise und kurz sein.
+    - Stelle die Fragen so, als 
+    - Gib das Ergebnis ausschließlich als JSON-Objekt mit den Keys "level_1", "level_2" und "level_3" aus.
+    - Unter jedem Key steht wiederum ein JSON-Objekt mit "question" und "answer".
+    - Keine anderen Texte oder Erklärungen ausgeben.
+    - nutze keine Füll- oder Bindewörter sondern formuliere die Antworten stichpunktartig
+
+    Definition der Komplexitätsgrade:
+    1 = sehr einfache, faktische Frage - max. 2 Worte
+    2 = inhaltlich tiefergehende, aber kurze Frage - keine Wort-Limits
+    3 = analytische oder interpretierende Frage (z. B. Ursache, Wirkung, Ziel) - keine Wort-Limits
+
+    Beispiele:
+    Beispielkontext: cdu csu fraktion frau präsidentin meine sehr geehrten damen und herren liebe kolleginnen und kollegen wo man am meisten drauf erpicht grad das bekommt man meistens nicht liebe kolleginnen und kollegen von den linken und den grünen dieses zitat von wilhelm busch passt perfekt zu ihren anträgen gern erläutere ich warum das so ist sie fordern dass die co kosten allein den vermieterinnen und vermietern aufgebürdet werden sollen und erhoffen sich hierdurch dass die energetische sanierung der gebäude angereizt wird
+    Beispiel Fragen/Antworten:
+    {{
+      "level_1": {{ "question": "Wer wird angesprochen?", "answer": "Linke, Grüne" }},
+      "level_2": {{ "question": "Was wird gefordert?", "answer": "CO-Kosten übernehmen" }},
+      "level_3": {{ "question": "Warum sollen Vermieter zahlen?", "answer": "Sanierungsanreiz" }}
+    }}
+
+    Beispielkontext: hat kann man davon ausgehen dass die regulierung der europäischen union egal ob das jetzt eine verordnung oder eine direktive wird dieselbe richtung gehen wird sie wird detaillierter sein sie wird bestimmte dinge nochmal ausführlicher auch sicher ausbuchstabieren ich halte das deutsche gesetz für eine gute vorbereitung und letzten endes gibt es den deutschen unternehmen da auch ein stück wettbewerbsvorsprung ich weiß es wird jetzt hier sehr konservativ diskutiert nach dem motto na ja
+    eispiel Fragen/Antworten:
+    {{
+      "level_1": {{ "question": "Was wird detaillierter sein?", "answer": "Verordnung" }},
+      "level_2": {{ "question": "Welchen Vorteil hat das deutsche Gesetz?", "answer": "Es ermöglicht deutschen Unternehmen einen Wettbewerbsvorsprung" }},
+      "level_3": {{ "question": "Wie unterscheidet sich die Verordnung der europäischen Union vom deutschen Gesetz?", "answer": "Die Verordnung der europäischen Union wird detaillierter sein als das deutsche Gesetz?" }}
+      }}
