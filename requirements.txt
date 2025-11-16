@@ -1,0 +1,5 @@
+pyarrow
+python-dotenv
+snac
+peft
+soundfile
