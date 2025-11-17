@@ -1,22 +1,11 @@
 import json
-from enum import Enum
-from typing import TypedDict, cast
+from typing import cast
+from sqa_types import QuestionAnswerPair
 
 from ask_lisa import ask_lisa, LisaLevelResponse
 
-
-class QuestionDifficulty(Enum):
-    EASY = 1
-    MEDIUM = 2
-    HARD = 3
-
-class QuestionAnswerPair(TypedDict):
-    question: str
-    answer: str
-    difficulty: int
-
 # load system prompt
-with open("../system_prompt.txt", "r", encoding="utf-8") as f:
+with open("../../system_prompt.txt", "r", encoding="utf-8") as f:
     system_prompt = f.read()
 
 def generate_qa(transcript: str) -> list[QuestionAnswerPair]:
@@ -33,7 +22,7 @@ def generate_qa(transcript: str) -> list[QuestionAnswerPair]:
     level3 = cast(LisaLevelResponse, qa_all.get("level_3", {}))
 
     return [
-        {**level1, "difficulty": QuestionDifficulty.EASY},
-        {**level2, "difficulty": QuestionDifficulty.MEDIUM},
-        {**level3, "difficulty": QuestionDifficulty.HARD}
+        {**level1, "difficulty": 1},
+        {**level2, "difficulty": 2},
+        {**level3, "difficulty": 3}
     ]
