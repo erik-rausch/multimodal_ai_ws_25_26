@@ -5,7 +5,7 @@ from sqa_types import QuestionAnswerPair
 from ask_lisa import ask_lisa, LisaLevelResponse
 
 # load system prompt
-with open("../../system_prompt.txt", "r", encoding="utf-8") as f:
+with open("../system_prompt.txt", "r", encoding="utf-8") as f:
     system_prompt = f.read()
 
 def generate_qa(transcript: str) -> list[QuestionAnswerPair]:

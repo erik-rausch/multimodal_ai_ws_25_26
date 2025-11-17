@@ -5,7 +5,7 @@ import requests
 api_token = None
 url = "https://chat-1.ki-awz.iisys.de/api/chat/completions"
 
-with open("../../api_token.txt", encoding="UTF-8") as rf:
+with open("../api_token.txt", encoding="UTF-8") as rf:
     api_token = rf.read().strip()
 
 class LisaLevelResponse(TypedDict):

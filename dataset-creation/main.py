@@ -4,11 +4,11 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from sqa_types import Transcript, SpokenQuestionAnswerPair
-from steps.generate_questions import generate_qa
-from steps.index_files import load_transcript
-from steps.generate_tts import to_speech
+from generate_questions import generate_qa
+from index_files import load_transcript
+from generate_tts import to_speech
 from datetime import datetime
-from steps.combine_parquet import export_parquet
+from combine_parquet import export_parquet
 
 base_dir = "/training-1/asr_dataset_files/asr_bundestag"
 train = base_dir + "/train_nodev"

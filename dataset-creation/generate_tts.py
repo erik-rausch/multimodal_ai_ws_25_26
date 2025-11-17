@@ -11,7 +11,7 @@ import soundfile as sf
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 # load voices from voices.txt
-with open("../voices.txt", "r", encoding="utf-8") as vf:
+with open("voices.txt", "r", encoding="utf-8") as vf:
     voices = [line.strip() for line in vf.readlines() if line.strip()]
 
 model = AutoModelForCausalLM.from_pretrained(
