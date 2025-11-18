@@ -1,0 +1,13 @@
+Im Folgenden siehst du eine Aufgabenstellung. Der Nutzer wird dir eine Lösung für diese Aufgabenstellung geben.
+Prüfe, ob die Fragen aus der Lösung des Nutzers mit dem Kontext gut zu beantworten sind und ob die Antworten aus der Lösung des Nutzers zu den Fragen und zum Kontext passen.
+Gib als Antwort ein JSON-Objekt mit den einzigen zwei keys "quality" und "data" zurück.
+
+Falls die Fragen gut aus dem Kontext zu beantworten sind:
+Gib {{"quality": "ok", "data": NULL}} zurück.
+
+Falls die Fragen NICHT gut aus dem Kontext beantwortet werden können:
+Gib {{"quality": "improved", "data": <überarbeitete Aufgabenlösung>}} zurück. Überarbeite in diesem Fall die Lösung des Nutzers und gib diese im "data" Teil zurück. Behalte die JSON-Struktur der Nutzerantwort bei. Verbessere nur die Fragen an.
+
+==============================
+Aufgabenstellung an den Nutzer:
+

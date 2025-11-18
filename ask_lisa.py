@@ -1,3 +1,5 @@
+from typing import TypedDict
+
 import requests
 
 api_token = None
@@ -6,11 +8,15 @@ url = "https://chat-1.ki-awz.iisys.de/api/chat/completions"
 with open("api_token.txt", encoding="UTF-8") as rf:
     api_token = rf.read().strip()
 
-def ask_lisa(system_prompt: str, question: str, temperature: float = 0.1, top_p: float = 0.9) -> str:
+class LisaLevelResponse(TypedDict):
+    question: str
+    answer: str
+
+def ask_lisa(system_prompt: str, question: str, temperature: float = 0.1, top_p: float = 0.9) -> LisaLevelResponse | None:
     """Sendet eine Anfrage an das LISA-Chat-API-Modell."""
     global url, api_token
 
-    model = "qwen/qwen3-next-80b"
+    model = "qwen3_235b-a22b-instruct-2507-q4_K_M:eot-fix"
     headers = {
         "Authorization": f"Bearer {api_token}",
         "Content-Type": "application/json"
@@ -31,4 +37,8 @@ def ask_lisa(system_prompt: str, question: str, temperature: float = 0.1, top_p:
 
     response_json = response.json()
 
-    return response_json["choices"][0]["message"]["content"]
+    if response.status_code == 200:
+        return response_json["choices"][0]["message"]["content"]
+    else:
+        print(response_json)
+        return

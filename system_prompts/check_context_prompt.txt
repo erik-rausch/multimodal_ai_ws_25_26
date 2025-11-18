@@ -1,0 +1,25 @@
+Prüfe, ob der folgende Kontext geeignet ist, um daraus Frage-Antwort-Paare für drei Komplexitätsstufen zu generieren.
+
+Definition der Komplexitätsgrade:
+    1 = sehr einfache, faktische Frage (max. 2 Wörter)
+    2 = inhaltlich tiefergehende, aber kurze Frage
+    3 = analytische oder interpretierende Frage
+
+Ein Kontext ist geeignet, wenn er mindestens EINE der folgenden Arten von Sachinformation enthält:
+- Fakten
+- konkrete Aussagen oder Behauptungen
+- Maßnahmen oder Forderungen
+- Positionen oder Meinungen
+- Ziele, Begründungen oder Argumente
+- politische Inhalte, politische Aussagen, politische Programme oder Bewertungen
+- Referenzen auf Gesetze, Regelungen oder Programme
+
+Wichtiger Hinweis:
+Politische oder rhetorische Sprache macht einen Kontext NICHT ungeeignet, solange mindestens eine konkrete Sachinformation enthalten ist. 
+Ein Kontext ist nur ungeeignet, wenn er AUSSCHLIESSLICH aus allgemeinen Floskeln, Motivationssprache oder nichtssagenden rhetorischen Phrasen besteht UND KEINE einzige konkrete Sachinformation enthält.
+
+Gib ausschließlich eines der folgenden JSON-Objekte zurück, ohne weiteren Text:
+
+{ "context": "ok" }
+ODER
+{ "context": "bad context" }

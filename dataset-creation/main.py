@@ -19,11 +19,16 @@ wav_dir = "/training-1/asr/bundestag/dataset/wavs"
 load_dotenv(dotenv_path="../.env")
 
 datasets = {
-    "train": load_transcript(train, 70, 1200),
-    "validate": load_transcript(validate, 70, 150),
-    "test": load_transcript(test, 70, 150),
-    "dev": load_transcript(train, 70, 5)
+    "train": load_transcript(train, "train", 60, 1200),
+    "validate": load_transcript(validate, "validate", 60, 150),
+    "test": load_transcript(test, "test", 60, 150),
+    "dev": load_transcript(train, "example", 60, 5)
 }
+
+none_keys = [k for k, v in datasets.items() if v is None]
+
+if none_keys:
+    print("Nicht genug Transkripte bei:", none_keys)
 
 # first load transcripts
 transcripts: list[Transcript] = datasets['dev']
@@ -34,6 +39,7 @@ total_context_size = 0
 # generate questions + answers for transcripts using AI
 for (index, transcript) in enumerate(transcripts):
     print(f"Handling transcript {transcript['id']} - {index+1}/{len(transcripts)}")
+    
     questions = generate_qa(transcript['text'])
 
     total_context_size += os.path.getsize(transcript['filepath'])
