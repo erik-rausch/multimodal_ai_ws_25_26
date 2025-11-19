@@ -31,7 +31,7 @@ if none_keys:
     print("Nicht genug Transkripte bei:", none_keys)
 
 # first load transcripts
-transcripts: list[Transcript] = datasets['dev']
+transcripts: list[Transcript] = datasets['test']
 question_audios: dict[str, list[SpokenQuestionAnswerPair]] = {}
 
 total_context_size = 0

@@ -26,8 +26,6 @@ tokenizer = AutoTokenizer.from_pretrained(
 snac_model = SNAC.from_pretrained("hubertsiuzdak/snac_24khz")
 snac_model = snac_model.to("cuda")
 
-chosen_voice = "Martin"
-
 prompts = [
     'Tief im verwunschenen Wald, wo die Bäume uralte Geheimnisse flüsterten, lebte ein kleiner Gnom namens Fips, der die Sprache der Tiere verstand.',
 ]
@@ -106,6 +104,7 @@ def redistribute_codes(code_list):
 def to_speech(text):
     # random voice
     random_voice = voices[os.urandom(1)[0] % len(voices)]
+    print(f"---> using voice: {random_voice}")
 
     with torch.no_grad():
         code_list = process_single_prompt(text, random_voice)
