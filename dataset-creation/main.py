@@ -39,41 +39,54 @@ total_context_size = 0
 # generate questions + answers for transcripts using AI
 for (index, transcript) in enumerate(transcripts):
     print(f"Handling transcript {transcript['id']} - {index+1}/{len(transcripts)}")
-    
-    questions = generate_qa(transcript['text'])
-
-    total_context_size += os.path.getsize(transcript['filepath'])
 
     json_file_path = Path(os.path.join("tts-audios", transcript['id'], "question_set.json"))
     json_file_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(json_file_path, "w", encoding="utf-8") as f:
-        json.dump({
-            "questions": questions,
-            **transcript,
-        }, f, indent=2, ensure_ascii=False)
+
+    if json_file_path.exists():
+        print("-> JSON existiert bereits, lade Fragen aus Datei")
+        with open(json_file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+            questions = data["questions"]
+    else:
+        print("-> JSON existiert NICHT, generiere Fragen...")
+        questions = generate_qa(transcript['text'])
+        with open(json_file_path, "w", encoding="utf-8") as f:
+            json.dump({
+                "questions": questions,
+                **transcript,
+            }, f, indent=2, ensure_ascii=False)
+    
+
+    total_context_size += os.path.getsize(transcript['filepath'])
 
     spoken_questions: list[SpokenQuestionAnswerPair] = []
 
     for question in questions:
-        print(f"--> handling question {question['difficulty']}")
-        start_time = datetime.now()
-        # generate tts audio
-        wav = to_speech(question['question'])
+        wav_path = Path(f"tts-audios/{transcript['id']}/{question['difficulty']}.wav")
 
-        file_path = "tts-audios/" + transcript['id'] + f"/{question['difficulty']}.wav"
-        with open(file_path, "wb") as f:
-            f.write(wav)
+        # --- WAV-Datei prüfen ---
+        if wav_path.exists():
+            print(f"--> WAV is already existing: {wav_path.name}")
+            with open(wav_path, "rb") as f:
+                wav = f.read()
+        else:
+            print(f"--> Generate TTS for question ({question['difficulty']})")
+            start_time = datetime.now()
 
-        total_context_size += os.path.getsize(file_path)
+            wav = to_speech(question['question'])
 
-        finished_time = datetime.now()
+            with open(wav_path, "wb") as f:
+                f.write(wav)
+
+            print(f"--> HANDLED in {datetime.now() - start_time}")
+
+        total_context_size += os.path.getsize(wav_path)
 
         spoken_questions.append({
             **question,
             "audio_buffer": wav
         })
-
-        print(f"--> HANDLED in {finished_time - start_time}")
 
     question_audios[transcript['id']] = spoken_questions
 
