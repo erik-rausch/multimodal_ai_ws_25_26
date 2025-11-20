@@ -49,7 +49,7 @@ def generate_qa(context: str) -> list[QuestionAnswerPair]:
         qa_all = json.loads(qa_res)
     except json.JSONDecodeError:
         print("Antwort war kein gültiges JSON:", qa_res)
-        return []
+        return None
 
     verify = ask_lisa(
         system_prompt_verify,
@@ -81,7 +81,7 @@ def generate_qa(context: str) -> list[QuestionAnswerPair]:
 
     except json.JSONDecodeError:
         print("Antwort war kein gültiges JSON:", qa_res)
-        return None, None, None
+        return None
 
     level1 = cast(LisaLevelResponse, final_json.get("level_1", {}))
     level2 = cast(LisaLevelResponse, final_json.get("level_2", {}))

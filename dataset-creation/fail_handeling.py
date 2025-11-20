@@ -23,3 +23,6 @@ def remove_failed_samples():
             shutil.rmtree(target)
         else:
             print(f"Failed sample not found: {target}")
+
+    print(f"Deleting log file: {log_path}")
+    log_path.unlink()

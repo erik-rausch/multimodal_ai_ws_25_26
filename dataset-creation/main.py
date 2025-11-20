@@ -49,14 +49,14 @@ for (index, transcript) in enumerate(transcripts):
     json_file_path.parent.mkdir(parents=True, exist_ok=True)
 
     if json_file_path.exists():
-        print("-> JSON existiert bereits, lade Fragen aus Datei")
+        print("-> Checkpoint found: loading questions from JSON")
         with open(json_file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
             questions = data["questions"]
     else:
-        print("-> JSON existiert NICHT, generiere Fragen...")
+        print("-> No checkpoint found: generating questions...")
         questions = generate_qa(transcript['text'])
-        if questions is None:
+        if not questions or len(questions) != 3:
             add_failed_log(transcript['id'])
             failed_counter += 1
             continue
