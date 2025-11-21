@@ -11,20 +11,29 @@ Aufgabe:
 Beurteile, ob die generierte Antwort inhaltlich korrekt ist. Nutze Frage und Kontext zur Unterstützung, aber die Ground Truth Antwort ist die zentrale Referenz.
 
 
-Bewertungskategorien:
-
 1 — Korrekt
-Die generierte Antwort stimmt inhaltlich vollständig mit der Ground Truth überein. Abweichende Formulierungen sind erlaubt.
+
+Die generierte Antwort beantwortet die Frage direkt und stimmt inhaltlich vollständig mit der Ground Truth überein.
+Sie enthält die relevante Information in eigener Formulierung und nicht als reine Kopie des Kontextes.
 
 2 — Falsch
-Die generierte Antwort enthält eine oder mehrere falsche Aussagen, die der Ground Truth widersprechen.
 
-3 — Unvollständig oder zu vage
-Die generierte Antwort ist nicht eindeutig falsch, beantwortet die Frage jedoch nur teilweise oder zu allgemein.
-Sie lässt wichtige Informationen aus der Ground Truth weg oder formuliert so unpräzise, dass die Antwort nicht klar erkennbar ist.
+Die Antwort widerspricht der Ground Truth oder behauptet falsche Informationen.
 
-4 — Keine Antwort / irrelevant
-Die generierte Antwort geht nicht auf die Frage ein, ist thematisch unpassend, besteht aus Halluzinationen oder hat keinerlei Bezug zur Ground Truth.
+3 — Unvollständig / zu vage
+
+Die Antwort ist nicht falsch, enthält aber nur einen Teil der Information
+oder ist so allgemein formuliert, dass der Kern der Ground Truth fehlt.
+
+4 — Keine Antwort / irrelevant / reine Reproduktion
+
+Die generierte Antwort beantwortet die Frage nicht.
+Dies umfasst insbesondere folgende Fälle:
+* reproduziert den Kontext wortwörtlich oder fast wortwörtlich
+* reproduziert die Frage
+* besteht aus Text ohne Bezug zur Ground Truth
+* ist Halluzination oder unverständlicher Text
+* enthält keine explizite Beantwortung der Frage
 
 Ausgabeformat: Gib nur die Zahl der passenden Kategorie zurück (1, 2, 3 oder 4).
 Kein weiterer Text.
