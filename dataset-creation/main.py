@@ -35,7 +35,7 @@ if none_keys:
     print("Nicht genug Transkripte bei:", none_keys)
 
 # first load transcripts
-current_partition = 'train'
+current_partition = 'validate'
 transcripts: list[Transcript] = datasets[current_partition]
 question_audios: dict[str, list[SpokenQuestionAnswerPair]] = {}
 
