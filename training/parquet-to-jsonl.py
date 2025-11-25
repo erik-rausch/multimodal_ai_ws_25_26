@@ -3,15 +3,13 @@ from pathlib import Path
 import pandas as pd
 import json
 
-wavs = "dataset/wavs/"
-
-input_file = "../dataset-creation/out/validate.parquet"
-output_file = "dataset/output1.jsonl"
-
-
-def extract_parquet(parquet_file):
-    df = pd.read_parquet(parquet_file)
-
+wavs = "dataset/wavs"
+parquet_path = "../dataset-creation/out/"
+inputs = {
+    "train": "train.parquet",
+    "validate": "validate.parquet",
+    "test": "test.parquet"
+}
 
 
 def parquet_to_jsonl(parquet_file, jsonl_file):
@@ -41,6 +39,7 @@ def parquet_to_jsonl(parquet_file, jsonl_file):
                 'answer_text': row.get("a1_text"),
                 'level': 1
             }, f, ensure_ascii=False)
+            f.write('\n')
 
             with open(f"{base_path}/q1.wav", 'wb') as af:
                 af.write(row.get("q1_audio"))
@@ -55,6 +54,7 @@ def parquet_to_jsonl(parquet_file, jsonl_file):
                 'answer_text': row.get("a2_text"),
                 'level': 2
             }, f, ensure_ascii=False)
+            f.write('\n')
 
             with open(f"{base_path}/q2.wav", 'wb') as af:
                 af.write(row.get("q2_audio"))
@@ -75,5 +75,5 @@ def parquet_to_jsonl(parquet_file, jsonl_file):
 
             f.write('\n')
 
-
-parquet_to_jsonl(input_file, output_file)
+for k, v in inputs.items():
+    parquet_to_jsonl(f"{parquet_path}{v}", f"dataset/{k}.jsonl")

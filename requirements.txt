@@ -5,3 +5,5 @@ peft
 soundfile
 pandas
 dotenv
+librosa
+torchaudio
