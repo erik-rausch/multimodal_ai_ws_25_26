@@ -1,6 +1,7 @@
-from ask_lisa import ask_lisa
 import json
 import os
+from pathlib import Path
+from ask_lisa import ask_lisa
 from inference_sqa_granite_onestep import infer_audio_context__text_question, infer_audio_context__audio_question, \
     infer_text_context__audio_question
 
@@ -44,29 +45,29 @@ for mode, inference in modes.items():
     results = {
         "items": len(dataset_entries),
         "overall": {
+            0: 0,
             1: 0,
             2: 0,
-            3: 0,
-            4: 0
+            3: 0
         },
         "difficulties": {
             1: {
+                0: 0,
                 1: 0,
                 2: 0,
-                3: 0,
-                4: 0
+                3: 0
             },
             2: {
+                0: 0,
                 1: 0,
                 2: 0,
-                3: 0,
-                4: 0
+                3: 0
             },
             3: {
+                0: 0,
                 1: 0,
                 2: 0,
-                3: 0,
-                4: 0
+                3: 0
             }
         }
     }
@@ -74,12 +75,20 @@ for mode, inference in modes.items():
     overall = results["overall"]
     item_count = len(dataset_entries)
     results["items"] = item_count
+    out_file = f"{out_path}eval-{mode}-results.jsonl"
+    out_compact_file = f"{out_path}eval-{mode}-results-compact.json"
+
+    if Path(out_file).exists() and Path(out_compact_file).exists():
+        print(f"Skipping {mode} because results already exist.")
+        continue
 
     for index, entry in enumerate(dataset_entries):
         print(f"[{mode}] Processing entry {index + 1}/{item_count}")
         generated_answer = inference(entry)
         print(f"--> {generated_answer}")
+
         eval_value = evaluate(entry["context_text"], entry["question_text"], entry["answer_text"], generated_answer)
+        entry["generated_answer"] = generated_answer
         print(f"--> Evaluation: {eval_value}")
         if eval_value == -1:
             raise ValueError("The Lisa result had the wrong format.")
@@ -89,12 +98,12 @@ for mode, inference in modes.items():
         difficulties[entry["level"]][eval_value] += 1
 
     os.makedirs(out_path, exist_ok=True)
-    with open(f"{out_path}eval-{mode}-results.jsonl", "w", encoding="utf-8") as f:
+    with open(out_file, "w", encoding="utf-8") as f:
         for entry in dataset_entries:
             json.dump(entry, f, ensure_ascii=False)
             f.write("\n")
 
-    with open(f"{out_path}eval-{mode}-results-compact.json", "w") as f:
+    with open(out_compact_file, "w") as f:
         json.dump(results, f)
 
     print(f"""

@@ -7,3 +7,4 @@ output.wav
 *.parquet
 .venv
 .idea
+evaluation_results/

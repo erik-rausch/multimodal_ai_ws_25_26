@@ -2,6 +2,8 @@ import librosa
 import torch
 from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
 from huggingface_hub import hf_hub_download
+import numpy as np
+from scipy.io import wavfile
 
 # -----------------------------------------------------------
 # Model initialisation
@@ -17,6 +19,7 @@ model = AutoModelForSpeechSeq2Seq.from_pretrained(
     torch_dtype=torch.bfloat16,
 )
 
+
 # -----------------------------------------------------------
 # Utility: load audio at 16kHz
 # -----------------------------------------------------------
@@ -25,11 +28,19 @@ def load_audio(audio_path):
     return audio
 
 
+def combine_audios(path_1, path_2, pause_sec=1.5):
+    audio1, sr1 = librosa.load(path_1, sr=16000)
+    audio2, sr2 = librosa.load(path_2, sr=16000)
+    assert sr1 == sr2 == 16000, "Beide Dateien müssen 16 kHz haben!"
+    pause = np.zeros(int(sr1 * pause_sec), dtype=np.float32)
+    combined_audio = np.concatenate([audio1, pause, audio2])
+    return combined_audio
+
+
 # -----------------------------------------------------------
 # Utility: run model inference
 # -----------------------------------------------------------
 def run_inference(prompt: str, audio_signal):
-    # prepare model inputs
     model_inputs = processor(prompt, audio_signal, device=device, return_tensors="pt").to(device)
 
     # generate
@@ -84,21 +95,13 @@ def infer_text_context__audio_question(entry) -> str:
 # 3) Context + Question = Both Audio (concatenated with silence)
 # ===========================================================
 def infer_audio_context__audio_question(entry) -> str:
-    context_audio = load_audio(entry["context_audio"])
-    question_audio = load_audio(entry["question_audio"])
-
-    # 2 second of silence at 16kHz
-    silence = torch.zeros(int(32000))
-
-    # concatenate context + silence + question
-    combined = torch.cat([torch.tensor(context_audio), silence, torch.tensor(question_audio)], dim=0)
-
+    audio = combine_audios(entry["context_audio"], entry["question_audio"])
     instruction = (
-        "Beantworte die Frage im zweiten Audioteil basierend auf dem Inhalt des ersten Audioteils. "
-        "Die beiden sind durch Stille getrennt."
+        "Das Audio <|audio|> besteht aus einem Kontext und einer Frage zum Kontext."
+        "Zuerst kommt der Kontext, dann Stille, dann die Frage.\n\n"
+        "Beantworte diese Frage basierend auf diesem Kontext."
     )
 
     chat = [dict(role="user", content=instruction)]
     prompt = tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
-
-    return run_inference(prompt, combined.cpu().numpy())
+    return run_inference(prompt, audio)
