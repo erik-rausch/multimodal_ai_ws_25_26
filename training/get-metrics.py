@@ -17,9 +17,11 @@ def generate_word_count_report(file_path: str, name: str):
     df = pd.DataFrame(data)
 
     df['word_count'] = df['generated_answer'].apply(lambda x: len(x.split()) if pd.notna(x) else 0)
+    df['startswith_mr_president'] = df['generated_answer'].apply(lambda x: x.lower().startswith('herr präsident ') if pd.notna(x) else False)
+    df['startswith_mr_president_exclamation'] = df['generated_answer'].apply(lambda x: x.lower().startswith('herr präsident! ') if pd.notna(x) else False)
 
-    result_df = df[['context_id', 'level', 'word_count']].copy()
-    result_df.columns = ['transcript_id', 'level', 'word_count']
+    result_df = df[['context_id', 'level', 'word_count', 'startswith_mr_president', 'startswith_mr_president_exclamation']].copy()
+    result_df.columns = ['transcript_id', 'level', 'word_count', 'startswith_mr_president', 'startswith_mr_president_exclamation']
 
     print(result_df.head())
 

@@ -7,3 +7,4 @@ pandas
 dotenv
 librosa
 torchaudio
+pydub
