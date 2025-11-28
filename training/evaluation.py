@@ -1,11 +1,10 @@
 import json
 import os
 from pathlib import Path
-from ask_lisa import ask_lisa
+from train_utils import evaluate
 from inference_sqa_granite_onestep import infer_audio_context__text_question, infer_audio_context__audio_question, \
     infer_text_context__audio_question
 
-eval_prompt_path = "../system_prompts/eval_answer_prompt.txt"
 test_partition = "dataset/test.jsonl"
 out = "evaluation_results/"
 evaluation_id = "untrained"
@@ -16,23 +15,6 @@ modes = {
     "tc-aq": infer_text_context__audio_question,
     "ac-aq": infer_audio_context__audio_question
 }
-
-with open(eval_prompt_path, "r") as f:
-    eval_prompt = f.read()
-
-
-def evaluate(context: str, question: str, expected_answer: str, generated_answer: str) -> int:
-    res = ask_lisa(eval_prompt, f"""
-        Kontext: {context}
-        Frage: {question}
-        Ground Truth Antwort: {expected_answer}
-        Generierte Antwort: {generated_answer}
-    """)
-    if res is None or len(res) > 1:
-        print(f"Wrong format: {res}")
-        return -1
-    return int(res)
-
 
 dataset_entries = []
 
