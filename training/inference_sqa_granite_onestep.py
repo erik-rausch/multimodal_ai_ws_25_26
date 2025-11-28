@@ -4,6 +4,7 @@ from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
 from huggingface_hub import hf_hub_download
 import numpy as np
 from scipy.io import wavfile
+from train_utils import combine_audios, load_audio
 
 # -----------------------------------------------------------
 # Model initialisation
@@ -18,23 +19,6 @@ model = AutoModelForSpeechSeq2Seq.from_pretrained(
     device_map=device,
     torch_dtype=torch.bfloat16,
 )
-
-
-# -----------------------------------------------------------
-# Utility: load audio at 16kHz
-# -----------------------------------------------------------
-def load_audio(audio_path):
-    audio, sr = librosa.load(audio_path, sr=16000)
-    return audio
-
-
-def combine_audios(path_1, path_2, pause_sec=1.5):
-    audio1, sr1 = librosa.load(path_1, sr=16000)
-    audio2, sr2 = librosa.load(path_2, sr=16000)
-    assert sr1 == sr2 == 16000, "Beide Dateien müssen 16 kHz haben!"
-    pause = np.zeros(int(sr1 * pause_sec), dtype=np.float32)
-    combined_audio = np.concatenate([audio1, pause, audio2])
-    return combined_audio
 
 
 # -----------------------------------------------------------
