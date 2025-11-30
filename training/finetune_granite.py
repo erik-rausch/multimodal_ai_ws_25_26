@@ -1,7 +1,9 @@
 import json
 
 import librosa
+import random
 import soundfile as sf
+from pathlib import Path
 import torch
 import tqdm
 from datasets import Audio, Dataset
@@ -15,6 +17,8 @@ from transformers.feature_extraction_utils import BatchFeature
 from transformers.models.granite_speech import GraniteSpeechForConditionalGeneration, GraniteSpeechProcessor
 
 train_mode = "ac-tq"
+run_number = 1
+model_name = "/training-1/modelhub/granite-speech-3.3-2b"
 
 if train_mode == "ac-tq":
     get_audio = ac_tq_audio
@@ -26,8 +30,11 @@ else:
     get_audio = ac_aq_audio
     get_instruction = ac_aq_instruction
 
-output_dir = f"logs/{train_mode}-1"
-model_name = "/training-1/modelhub/granite-speech-3.3-2b"
+output_dir = f"logs/{train_mode}-{run_number}"
+
+if Path(output_dir).exists():
+    print(f"Output directory {output_dir} already exists. Skipping training.")
+    exit(0)
 
 
 def load_dataset(path, split):
@@ -99,6 +106,7 @@ class GraniteCollator:
 
 
 def compute_performance(model, processor, cur_dataset, print_limit=5):
+    print_limit = min(print_limit, len(cur_dataset))
     with torch.no_grad():
 
         collator = GraniteCollator(processor, inference_mode=True)
@@ -143,7 +151,7 @@ def compute_performance(model, processor, cur_dataset, print_limit=5):
         Partially: {lisa_outputs[3]}
         Format Error: {lisa_outputs[-1]}
         """)
-        return lisa_outputs[1] / (lisa_outputs[-1] + lisa_outputs[0] + lisa_outputs[1] + lisa_outputs[2] + lisa_outputs[3])
+        return lisa_outputs[1] / len(cur_dataset)
 
 
 train_dataset = load_dataset("dataset", "train")
@@ -162,7 +170,7 @@ print(f"Performance before finetuning {performance_before_train}")
 
 
 class PerformanceCallback(TrainerCallback):
-    def __init__(self, processor, dataset, log_dir="runs/performance", val_size=2):
+    def __init__(self, processor, dataset, log_dir=output_dir, val_size=2):
         super().__init__()
         self.processor = processor
         self.full_dataset = dataset
@@ -170,12 +178,14 @@ class PerformanceCallback(TrainerCallback):
         self.val_size = val_size
 
     def on_epoch_end(self, args, state, control, **kwargs):
-        subset = self.full_dataset.shuffle(seed=42).take(self.val_size)
+        indices = random.sample(range(len(self.full_dataset)), self.val_size)
+        subset = self.full_dataset.select(indices)
         model = kwargs["model"]
         model.eval()
         with torch.no_grad():
             perf = compute_performance(model, self.processor, subset)
-        print(f"Performance after epoch {int(state.epoch)}: {perf}")
+        print(f"Performance after epoch {state.epoch}: {perf}")
+
         self.writer.add_scalar("Accuracy", perf, int(state.epoch))
         self.writer.flush()
 
@@ -204,7 +214,7 @@ args = TrainingArguments(
 )
 
 data_collator = GraniteCollator(processor)
-performance_callback = PerformanceCallback(processor, val_dataset, log_dir=output_dir, val_size=5)
+performance_callback = PerformanceCallback(processor, val_dataset, log_dir=output_dir, val_size=100)
 
 trainer = Trainer(
     model=model,

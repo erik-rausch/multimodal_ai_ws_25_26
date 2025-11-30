@@ -1,5 +1,6 @@
 import librosa
 from ask_lisa import ask_lisa
+import numpy as np
 
 eval_prompt_path = "../system_prompts/eval_answer_prompt.txt"
 

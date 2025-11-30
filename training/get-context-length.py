@@ -27,7 +27,7 @@ def get_total_audio_duration(filenames):
 if __name__ == "__main__":
     
     # parquet holen
-    parquet_file = "../dataset-creation/out/validate.parquet"
+    parquet_file = "../dataset-creation/out/test.parquet"
     df = pd.read_parquet(parquet_file)
     
     # nur transcript holen

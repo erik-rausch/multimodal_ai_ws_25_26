@@ -1,21 +1,22 @@
 import librosa
 import torch
-from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
 from huggingface_hub import hf_hub_download
-import numpy as np
 from scipy.io import wavfile
-from train_utils import combine_audios, load_audio
+from train_utils import ac_tq_instruction, tc_aq_instruction, ac_aq_instruction, load_audio, combine_audios
+from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
 
 # -----------------------------------------------------------
 # Model initialisation
 # -----------------------------------------------------------
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-model_name = "/training-1/modelhub/granite-speech-3.3-2b"
-processor = AutoProcessor.from_pretrained(model_name)
+# model_base_path = "/training-1/modelhub/granite-speech-3.3-2b"
+model_base_path = "logs/ac-tq-1/checkpoint-6750"
+
+processor = AutoProcessor.from_pretrained(model_base_path)
 tokenizer = processor.tokenizer
 model = AutoModelForSpeechSeq2Seq.from_pretrained(
-    model_name,
+    model_base_path,
     device_map=device,
     torch_dtype=torch.bfloat16,
 )
@@ -47,45 +48,19 @@ def run_inference(prompt: str, audio_signal):
 # 1) Context = Audio, Question = Text
 # ===========================================================
 def infer_audio_context__text_question(entry) -> str:
-    question = entry["question_text"]
-    instruction = f"Beantworte die Frage '{question}' aus dem Inhalt des folgenden Audios <|audio|>"
-
-    chat = [dict(role="user", content=instruction)]
-    prompt = tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
-
-    audio = load_audio(entry["context_audio"])
-    return run_inference(prompt, audio)
+    return run_inference(ac_tq_instruction(tokenizer, entry), load_audio(entry["context_audio"]))
 
 
 # ===========================================================
 # 2) Context = Text, Question = Audio
 # ===========================================================
 def infer_text_context__audio_question(entry) -> str:
-    context = entry["context_text"]
-    instruction = (
-        f"Der folgende Text bildet den Kontext:\n\n"
-        f"{context}\n\n"
-        f"Beantworte die Frage aus dem folgenden Audio <|audio|> basierend auf diesem Kontext."
-    )
-
-    chat = [dict(role="user", content=instruction)]
-    prompt = tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
-
-    audio_question = load_audio(entry["question_audio"])
-    return run_inference(prompt, audio_question)
+    return run_inference(tc_aq_instruction(tokenizer, entry), load_audio(entry["question_audio"]))
 
 
 # ===========================================================
 # 3) Context + Question = Both Audio (concatenated with silence)
 # ===========================================================
 def infer_audio_context__audio_question(entry) -> str:
-    audio = combine_audios(entry["context_audio"], entry["question_audio"])
-    instruction = (
-        "Das Audio <|audio|> besteht aus einem Kontext und einer Frage zum Kontext."
-        "Zuerst kommt der Kontext, dann Stille, dann die Frage.\n\n"
-        "Beantworte diese Frage basierend auf diesem Kontext."
-    )
-
-    chat = [dict(role="user", content=instruction)]
-    prompt = tokenizer.apply_chat_template(chat, tokenize=False, add_generation_prompt=True)
-    return run_inference(prompt, audio)
+    _, audio = combine_audios(entry["context_audio"], entry["question_audio"])
+    return run_inference(ac_aq_instruction(tokenizer, entry), audio)

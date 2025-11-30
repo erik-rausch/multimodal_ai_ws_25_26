@@ -7,7 +7,7 @@ from inference_sqa_granite_onestep import infer_audio_context__text_question, in
 
 test_partition = "dataset/test.jsonl"
 out = "evaluation_results/"
-evaluation_id = "untrained"
+evaluation_id = "ac-tq-1"
 out_path = f"{out}{evaluation_id}/"
 # t = text, a = audio, c = context, q = question
 modes = {
