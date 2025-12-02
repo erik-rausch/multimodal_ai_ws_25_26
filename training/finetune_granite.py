@@ -17,7 +17,7 @@ from transformers.feature_extraction_utils import BatchFeature
 from transformers.models.granite_speech import GraniteSpeechForConditionalGeneration, GraniteSpeechProcessor
 
 train_mode = "ac-tq"
-run_number = 1
+run_number = 6
 model_name = "/training-1/modelhub/granite-speech-3.3-2b"
 
 if train_mode == "ac-tq":
@@ -204,13 +204,13 @@ args = TrainingArguments(
     dataloader_num_workers=1,
     per_device_train_batch_size=1,
     per_device_eval_batch_size=1,
-    gradient_accumulation_steps=8,
-    num_train_epochs=15.0,
-    warmup_ratio=0.1,
+    gradient_accumulation_steps=48,
+    num_train_epochs=9.0,
+    warmup_ratio=0.15,
     logging_steps=0.1,
-    learning_rate=5e-5,
+    learning_rate=3e-4,
     data_seed=42,
-    save_total_limit=1
+    save_total_limit=1,
 )
 
 data_collator = GraniteCollator(processor)

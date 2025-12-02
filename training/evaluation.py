@@ -1,14 +1,62 @@
 import json
 import os
 from pathlib import Path
-from train_utils import evaluate
-from inference_sqa_granite_onestep import infer_audio_context__text_question, infer_audio_context__audio_question, \
-    infer_text_context__audio_question
+from train_utils import evaluate, ac_tq_instruction, tc_aq_instruction, ac_aq_instruction, load_audio, combine_audios
+import librosa
+import torch
+from huggingface_hub import hf_hub_download
+from scipy.io import wavfile
+from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
 
 test_partition = "dataset/test.jsonl"
 out = "evaluation_results/"
-evaluation_id = "ac-tq-1"
+evaluation_id = "ac-tq-4"
 out_path = f"{out}{evaluation_id}/"
+model_base_path = "logs/ac-tq-4/checkpoint-5400"
+# model_base_path = "/training-1/modelhub/granite-speech-3.3-2b"
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+processor = AutoProcessor.from_pretrained(model_base_path)
+tokenizer = processor.tokenizer
+model = AutoModelForSpeechSeq2Seq.from_pretrained(
+    model_base_path,
+    device_map=device,
+    torch_dtype=torch.bfloat16,
+)
+
+
+def run_inference(prompt: str, audio_signal):
+    model_inputs = processor(prompt, audio_signal, device=device, return_tensors="pt").to(device)
+
+    # generate
+    model_outputs = model.generate(
+        **model_inputs,
+        max_new_tokens=200,
+        do_sample=False,
+        num_beams=1
+    )
+
+    # extract only new tokens (strip the prompt)
+    num_input_tokens = model_inputs["input_ids"].shape[-1]
+    new_tokens = torch.unsqueeze(model_outputs[0, num_input_tokens:], dim=0)
+    output = tokenizer.batch_decode(new_tokens, add_special_tokens=False, skip_special_tokens=True)
+
+    return output[0]
+
+
+def infer_audio_context__text_question(entry) -> str:
+    return run_inference(ac_tq_instruction(tokenizer, entry), load_audio(entry["context_audio"]))
+
+
+def infer_text_context__audio_question(entry) -> str:
+    return run_inference(tc_aq_instruction(tokenizer, entry), load_audio(entry["question_audio"]))
+
+
+def infer_audio_context__audio_question(entry) -> str:
+    _, audio = combine_audios(entry["context_audio"], entry["question_audio"])
+    return run_inference(ac_aq_instruction(tokenizer, entry), audio)
+
+
 # t = text, a = audio, c = context, q = question
 modes = {
     "ac-tq": infer_audio_context__text_question,

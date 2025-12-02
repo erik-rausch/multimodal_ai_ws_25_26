@@ -11,7 +11,7 @@ from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # model_base_path = "/training-1/modelhub/granite-speech-3.3-2b"
-model_base_path = "logs/ac-tq-1/checkpoint-6750"
+model_base_path = "logs/ac-tq-4/checkpoint-5400"
 
 processor = AutoProcessor.from_pretrained(model_base_path)
 tokenizer = processor.tokenizer
