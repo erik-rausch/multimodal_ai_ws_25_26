@@ -19,7 +19,7 @@ def combine_audios(path_1, path_2, pause_sec=1.5):
     assert sr1 == sr2 == 16000, "Beide Dateien müssen 16 kHz haben!"
     pause = np.zeros(int(sr1 * pause_sec), dtype=np.float32)
     combined_audio = np.concatenate([audio1, pause, audio2])
-    return sr1, combined_audio
+    return combined_audio, sr1
 
 
 def evaluate(context: str, question: str, expected_answer: str, generated_answer: str) -> int:

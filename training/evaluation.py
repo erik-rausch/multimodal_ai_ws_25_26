@@ -10,9 +10,9 @@ from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
 
 test_partition = "dataset/test.jsonl"
 out = "evaluation_results/"
-evaluation_id = "ac-tq-4"
+evaluation_id = "ac-aq-2"
 out_path = f"{out}{evaluation_id}/"
-model_base_path = "logs/ac-tq-4/checkpoint-5400"
+model_base_path = f"logs/{evaluation_id}/checkpoint-675"
 # model_base_path = "/training-1/modelhub/granite-speech-3.3-2b"
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -47,13 +47,11 @@ def run_inference(prompt: str, audio_signal):
 def infer_audio_context__text_question(entry) -> str:
     return run_inference(ac_tq_instruction(tokenizer, entry), load_audio(entry["context_audio"]))
 
-
 def infer_text_context__audio_question(entry) -> str:
     return run_inference(tc_aq_instruction(tokenizer, entry), load_audio(entry["question_audio"]))
 
-
 def infer_audio_context__audio_question(entry) -> str:
-    _, audio = combine_audios(entry["context_audio"], entry["question_audio"])
+    audio, _ = combine_audios(entry["context_audio"], entry["question_audio"])
     return run_inference(ac_aq_instruction(tokenizer, entry), audio)
 
 

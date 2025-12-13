@@ -16,19 +16,31 @@ from transformers import TrainingArguments, Trainer
 from transformers.feature_extraction_utils import BatchFeature
 from transformers.models.granite_speech import GraniteSpeechForConditionalGeneration, GraniteSpeechProcessor
 
-train_mode = "ac-tq"
-run_number = 6
+TASKS = {
+    "ac-aq": {"audio": ac_aq_audio, "instr": ac_aq_instruction},
+    "ac-tq": {"audio": ac_tq_audio, "instr": ac_tq_instruction},
+    "tc-aq": {"audio": tc_aq_audio, "instr": tc_aq_instruction},
+}
+
+train_mode = "mixed"
+run_number = 2
 model_name = "/training-1/modelhub/granite-speech-3.3-2b"
 
-if train_mode == "ac-tq":
-    get_audio = ac_tq_audio
-    get_instruction = ac_tq_instruction
-elif train_mode == "tc-aq":
-    get_audio = tc_aq_audio
-    get_instruction = tc_aq_instruction
-else:
-    get_audio = ac_aq_audio
-    get_instruction = ac_aq_instruction
+if train_mode not in TASKS and train_mode != "mixed":
+    raise ValueError(f"Unknown train_mode: {train_mode}")
+
+def prep_entry(entry, tokenizer):
+    """
+    Set per-example task mode and create prompt using the corresponding instruction.
+    If train_mode is 'mixed' pick one of the tasks at random for this entry.
+    """
+    if train_mode == "mixed":
+        mode = random.choice(list(TASKS.keys()))
+    else:
+        mode = train_mode
+    entry["task_mode"] = mode
+    entry["prompt"] = TASKS[mode]["instr"](tokenizer, entry)
+    return entry
 
 output_dir = f"logs/{train_mode}-{run_number}"
 
@@ -45,11 +57,6 @@ def load_dataset(path, split):
             entries.append(entry)
     dataset = Dataset.from_list(entries)
     return dataset
-
-
-def prep_entry(entry, tokenizer):
-    entry["prompt"] = get_instruction(tokenizer, entry)
-    return entry
 
 
 def prepare_dataset(ds, processor):
@@ -75,7 +82,9 @@ class GraniteCollator:
         prompts = [example["prompt"] for example in entries]
         audios = []
         for entry in entries:
-            array, sr = get_audio(entry)  # decode WAV
+            mode = entry.get("task_mode", train_mode if train_mode in TASKS else "ac-aq")
+            audio_func = TASKS.get(mode, TASKS["ac-aq"])["audio"]
+            array, sr = audio_func(entry)  # decode WAV using the chosen task's loader
             if array.ndim > 1:
                 array = array.mean(axis=1)  # convert stereo → mono
             audios.append(array.astype("float32"))
